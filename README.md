@@ -39,8 +39,7 @@ The system extracts information from full-text scientific articles (PDFs) and Pu
 ovarian_cancer_resistance_kg/
 ├── data/                  # Project data storage
 │   ├── raw/               # Raw input data (PDFs and scraped abstracts)
-│   ├── releases/          # Versioned Knowledge Graph releases
-│   └── experiments/       # Evaluation results and analysis data
+│   └── releases/          # Versioned Knowledge Graph releases
 ├── src/                   # Main project source code
 │   ├── article_builder/       # KG construction module from PDFs
 │   ├── abstract_augmenter/    # KG augmenter module with PubMed abstracts
@@ -51,6 +50,7 @@ ovarian_cancer_resistance_kg/
 ├── config/                # Configuration files for modules
 ├── prompts/               # LLM prompt templates
 ├── requirements.txt       # Python dependencies
+├── license                # MIT license
 └── README.md              # This file
 ```
 
@@ -216,6 +216,11 @@ To access:
 2.  Select option `[5] Interactive Visualization (Web)`. This will automatically open the visualization in your default browser.
 3.  Alternatively, you can directly open `visualization/index.html` in your browser and load a graph from `data/releases/`.
 
+
+<video controls width="800">
+  <source src="assets/tool_demo.mp4" type="video/mp4">
+</video>
+
 ---
 
 ## 🤖 GraphRAG (Chat with the Graph)
@@ -227,6 +232,11 @@ To access:
 2.  Start the main menu (`python -m src.main`).
 3.  Select option `[6] GraphRAG Interface (Streamlit)`. This will launch the Streamlit application and open it in your browser.
 
+
+
+<video controls width="800">
+  <source src="assets/graphrag_demo.mp4" type="video/mp4">
+</video>
 ---
 
 ## 🔬 Experiments & Analysis Module
@@ -262,7 +272,7 @@ Select the number corresponding to the experiment you wish to execute.
 If you find this work useful, please cite:
 
 ```bibtex
-@article{yourpaper2026,
+@article{thompson2026,
   title={Your Paper Title},
   author={Your Name},
   journal={...},
@@ -271,4 +281,4 @@ If you find this work useful, please cite:
 ```
 
 ## 📬 Contact
-[yourname@university.edu](mailto:yourname@university.edu)
+[hjthompson@unsl.edu.ar](mailto:hjthompson@unsl.edu.ar)
