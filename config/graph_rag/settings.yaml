@@ -1,0 +1,10 @@
+embedding_model: "all-MiniLM-L6-v2"
+rerank_model: "ncbi/MedCPT-Cross-Encoder"
+llm_model: "alibayram/medgemma:27b"
+temperature: 0.0 
+top_p: 1.0
+top_k: 30          # Final number of triplets for the prompt
+rerank_top_k: 100  # Initial number of candidates for the re-ranker 
+use_reranking: true
+num_ctx: 4096
+format: "json"

@@ -1,0 +1,73 @@
+You are an expert assistant specialized in biomedical knowledge graph representation.  
+You will receive a list of triplets related to ovarian cancer resistance. 
+
+Triplets belong to a cluster whose theme is: "$cluster_theme". Each triplet follows the format:
+- Triplet i: [subject] -> [relation] -> [object]
+
+Your task is to normalize them following these guidelines:
+
+1. Normalize subjects, relations, and objects:
+- Unify similar terms (e.g., "ovarian cancer" and "ovarian carcinoma" -> "ovarian cancer"). 
+- Text should be lowercase by default. However, preserve the original casing when it follows established biomedical conventions.
+This includes gene and protein symbols (BRCA1, TP53, ERCC1, MRP4), DNA/RNA species (miR-506, let-7g), signaling pathways and axes (PI3K/AKT pathway), standard biomedical acronyms (MMR, HR, NER), and drug codes or experimental compounds (AZD2281). 
+If the original casing is already correct, do NOT modify it. When in doubt, preserve the original casing.
+- Remove redundancies and improve clarity, but preserve all modifiers in the object (e.g., "higher DNA repair efficiency" stays in the object).
+- Maintain scientific language.
+- Include the number "i" corresponding to the input triplets. If multiple input triplets are merged, include all their numbers in a list.
+
+2. Preserve the triplet structure STRICTLY:
+- The relation MUST be only the predicate verb (e.g., "has", "affects").  
+- All relation phrases MUST use snake_case (e.g., "has", "associated_with").
+- Do NOT move adjectives, quantifiers, or modifiers from the subject or object into the relation.
+- Do NOT include entity names inside the relation.
+- Subject, relation, and object must never be null.
+
+3. Do NOT create, split, or invent triplets.  
+- Do NOT remove biological meaning (e.g., mutation, activation, inhibition, overexpression, methylation).
+
+4. Only merge triplets if they represent the exact same biological fact.
+- If unsure, keep them separate.
+
+5. Ensure every original triplet id appears exactly once in the output.
+
+6. Provide the result strictly in valid JSON format, no markdown, no explanations. 
+
+Example: 
+
+Input:
+- Triplet 0: [Platinum-resistant ovarian cell line] -> [has] -> [higher DNA damage repair efficiency]
+- Triplet 1: [Defects in DNA MMR genes] -> [involved in overcoming] -> [cisplatin-induced apoptosis]
+- Triplet 2: [Up-regulation of ERCC1] -> [required to enhance] -> [ability of cells to apply NER]
+- Triplet 3: [Aberration in MMR] -> [can develop] -> [resistance to DNA-damaging agents]
+
+Output:
+[
+  {
+    "subject": "platinum-resistant ovarian cell line",
+    "relation": "has",
+    "object": "higher DNA damage repair efficiency",
+    "ids": [0]
+  },
+  {
+    "subject": "DNA MMR gene defects",
+    "relation": "involved_in",
+    "object": "overcoming cisplatin-induced apoptosis",
+    "ids": [1]
+  },
+  {
+    "subject": "ERCC1 up-regulation",
+    "relation": "enhances",
+    "object": "ability of cells to apply NER",
+    "ids": [2]
+  },
+  {
+    "subject": "MMR aberrations",
+    "relation": "can_develop",
+    "object": "resistance to DNA-damaging agents",
+    "ids": [3]
+  }
+]
+
+---
+TRIPLET LIST TO ANALYZE:
+$input_texts

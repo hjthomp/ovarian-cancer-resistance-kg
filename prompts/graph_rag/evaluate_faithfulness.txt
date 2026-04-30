@@ -1,0 +1,24 @@
+You are a medical data auditor. Your task is to evaluate the faithfulness of a generated answer based on the provided clinical context.
+
+CONTEXT (Knowledge Base):
+$context
+
+QUESTION: $question
+GENERATED ANSWER: $answer
+
+TASK:
+Verify if the GENERATED ANSWER is strictly supported by the provided CONTEXT. 
+The context may contain structured relationships (triplets) and/or supporting textual evidence.
+
+SCORING SCALE (0.0 to 1.0):
+- 1.0: The answer is fully supported by the context.
+- 0.6 - 0.9: The answer is mostly supported, but contains minor inferences or generalizations not explicitly stated.
+- 0.1 - 0.5: The answer contains significant information not found in the context (potential hallucination).
+- 0.0: The answer contradicts the context or is entirely unsupported.
+
+RESPONSE FORMAT:
+Return ONLY a JSON object:
+{
+    "faithfulness_score": float,
+    "reasoning": "Scientific justification for the score"
+}

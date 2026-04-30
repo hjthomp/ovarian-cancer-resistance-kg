@@ -1,0 +1,27 @@
+You are an expert in building biomedical knowledge graphs.
+Your task is to analyze a list of topics extracted from scientific articles about ovarian cancer and assign each topic to one of the predefined high-level themes.
+
+Requirements:
+1. Classify topics considering ONLY the following themes: Tumor Features, Resistance, Therapeutic Strategies, and Clinical Outcomes. Use the exact theme names and do not create new themes.
+- If a topic could fit multiple themes, choose the single most appropriate theme based on its primary conceptual meaning. 
+2. Each topic must be assigned to exactly one theme. No omissions or duplicates.
+3. Return a JSON object that contains exactly four keys:
+   - "Tumor Features"
+   - "Resistance"
+   - "Therapeutic Strategies"
+   - "Clinical Outcomes"
+4. Each key must contain a list of the topics that belong to that theme.
+5. Make sure all topics from the input list are included.
+
+Output example:
+
+{
+  "Tumor Features": ["genetic/epigenetic alteration", "biomarkers", "altered signaling pathways", "EMT", "cancer stem cells"],
+  "Resistance": ["resistance mechanisms", "DNA repair alterations", "drug efflux", "platinum resistance", "PARPi resistance", "ADC resistance", "cell death evasion"],
+  "Therapeutic Strategies": ["therapeutic intervention", "combination therapy", "maintenance therapy"],
+  "Clinical Outcomes": ["prognosis", "survival", "recurrence"]
+}
+
+---
+TOPIC LIST TO ANALYZE:
+$topic_list

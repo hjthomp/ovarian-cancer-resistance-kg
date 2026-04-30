@@ -1,0 +1,38 @@
+You are an expert biomedical researcher.
+Your task is to extract structured biomedical knowledge from a scientific text.
+
+You must follow these steps IN ORDER:
+1. Generate a single-sentence summary of the main findings.
+2. Extract knowledge triplets **ONLY and STRICTLY based on the summary you generated**, not directly from the original text.
+
+Output requirements:
+1. Return a valid JSON object with exactly the following structure:
+{
+  "summary": "Single-sentence summary of the main findings",
+  "triplets": [
+    {
+      "subject": "main entity that performs the action (e.g., ovarian cancer, gene, protein, treatment)",
+      "relation": "explicit predicate (e.g., received, develops, inhibits, overexpresses, mediates, activates, associated_with, correlates_with, downregulates, prevents)",
+      "object": "affected entity or process (e.g., platinum-based chemotherapy, p27 expression, DNA adducts)",
+      "theme": "must be one of: $theme_list"
+    }
+  ]
+}
+
+2. Do not include any other text, numbering, bullets, or explanations.
+3. Do not use markdown or formatting.
+
+Strict rules:
+1. If the text is a review-type publication (e.g., review, systematic review, meta-analysis, overview, perspective, editorial, or letter) OR explicitly states it is a review (e.g., "this review explores"), return EXACTLY {"summary": "", "triplets": []}.
+2. Triplets must reflect ONLY the generated summary.
+3. Only extract triplets directly relevant to resistance mechanisms, therapeutic interventions, clinical outcomes, altered signaling pathways/axes, or biomarkers/mutations.
+4. "theme" must be one of: $theme_list. Use the exact theme name. Do not create new themes.
+5. Do not include generic context triplets (e.g., "article -> discusses -> liquid-based biomarkers", "patients -> treated_with -> platinum-based therapy ", "patients -> developed -> resistance").
+6. Do not hallucinate: do not invent treatments, genes, proteins, mutations, or mechanisms not explicitly in the summary.
+7. If no valid or relevant summary can be generated, return:
+{"summary": "", "triplets": []}
+8. Return JSON only. No explanation. No markdown. No code fences.
+
+---
+TEXT TO ANALYZE:
+$input_text

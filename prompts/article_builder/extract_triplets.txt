@@ -1,0 +1,87 @@
+You are an expert assistant specialized in biomedical knowledge extraction.
+Your task is to extract knowledge triplets (subject, relation, object) from a list of scientific evidence related to ovarian cancer resistance. 
+
+Output requirements:
+
+1. Return a valid JSON array of objects.
+2. Each object must have exactly these keys:
+- "subject": main entity that performs the action (e.g., "ovarian cancer", gene, protein, treatment)
+- "relation": explicit predicate (e.g., "received", "develops", "inhibits", "overexpresses", "mediates", "activates", "associated_with", "correlates_with", "downregulates", "prevents")
+- "object": affected entity or process (e.g., "platinum-based chemotherapy", "p27 expression", "DNA adducts")
+- "triplet_topic": descriptive topic reflecting the type of information (e.g., "biomarkers", "therapeutic intervention", "EMT", "prognosis", "DNA repair alterations", "cancer stem cells", "genetic/epigenetic alteration", "resistance mechanisms", "survival", "recurrence", "platinum resistance", "combination therapy", "cell death evasion", "maintenance therapy")
+- "evidence_id": index of the evidence item
+3. Do not include any other text, numbering, bullets, or explanations.
+4. Do not use markdown or formatting.
+
+Strict rules for extraction:
+
+1. Only extract triplets that are directly relevant to resistance mechanisms, therapeutic interventions, clinical outcomes, altered signaling pathways/axes, or biomarkers/mutations.
+2. Extract all explicit triplets from the evidence. Include AT MOST 15 triplets per evidence, and stop once all relevant triplets have been extracted.
+3. Do not include generic context triplets (e.g., "review -> discusses -> liquid-based biomarkers", "patients -> treated_with -> platinum-based therapy ", "patients -> developed -> resistance"). 
+4. Do not include triplets when referring to a document or study context (e.g., review -> discusses -> liquid-based biomarkers).
+5. Do not hallucinate: do not invent treatments, genes, proteins, mutations, or mechanisms not explicitly in the evidence.
+6. To generalize, consider:
+- Group treatments or biomarkers into categories when biologically reasonable (e.g., "carboplatin", "cisplatin", and "oxaliplatin" -> "platinum-based chemotherapy"; "CD44", "CD24", "CD133", and "CD117" -> "CSC markers").
+- Use the specific disease name from the evidence only when directly relevant to resistance or treatment.
+- Convert pronouns to "patient". Skip irrelevant details such as age, general symptoms, or lab numbers unless directly related to resistance or treatment outcomes.
+
+Example for one evidence:
+
+Evidence 0: "An increased presence of cancer stem cells (CSCs) has also been implicated in therapy resistance and cancer relapse [45]. Overexpression of CSC markers is associated with enhanced EMT features and multi-drug resistance in OC [46]. Cisplatin induces the expression of EMT and CSC markers and promotes aggressiveness and chemoresistance of OC cells [39]. Several stem cell markers, including aldehyde dehydrogenase (ALDH), CD44, CD24, CD133, CD117, and CXCR4, are overexpressed in PROC as compared to the platinum-sensitive ones [46–48]. ALDH1A1 expression is further correlated with lower progression-free survival of OC patients [49, 50]".
+
+Output JSON:
+[
+  {
+    "subject": "increased CSC",
+    "relation": "associated_with",
+    "object": "therapy resistance",
+    "triplet_topic": "resistance mechanisms",
+    "evidence_id": 0
+  },
+  {
+    "subject": "increased CSC",
+    "relation": "associated_with",
+    "object": "cancer relapse",
+    "triplet_topic": "recurrence",
+    "evidence_id": 0
+  },
+  {
+    "subject": "CSC marker overexpression",
+    "relation": "associated_with",
+    "object": "enhanced EMT features",
+    "triplet_topic": "EMT",
+    "evidence_id": 0
+  },
+  {
+    "subject": "CSC marker overexpression",
+    "relation": "associated_with",
+    "object": "multi-drug resistance",
+    "triplet_topic": "resistance mechanisms",
+    "evidence_id": 0
+  },
+  {
+    "subject": "cisplatin",
+    "relation": "induces",
+    "object": "EMT and CSC marker expression",
+    "triplet_topic": "therapeutic intervention",
+    "evidence_id": 0
+  },
+  {
+    "subject": "PROC",
+    "relation": "overexpresses",
+    "object": "stem cell markers",
+    "triplet_topic": "cancer stem cells",
+    "evidence_id": 0
+  },
+  {
+    "subject": "ALDH1A1 expression",
+    "relation": "correlates_with",
+    "object": "lower progression-free survival",
+    "triplet_topic": "survival",
+    "evidence_id": 0
+  }
+]
+
+---
+EVIDENCE LIST TO ANALYZE:
+$evidence_list

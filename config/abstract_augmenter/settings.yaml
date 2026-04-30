@@ -1,0 +1,98 @@
+# ---------------------------------------
+# Settings for the 'augment_graph' module
+# ---------------------------------------
+
+llm_types: 
+  _doc: |
+    Predefined models. Each model must define:
+    - model_name: LLM model identifier or path.
+    - temperature: Controls randomness. Range [0.0-1.0]
+        * Low (0.0-0.2): deterministic, minimal variation
+        * Medium (0.3-0.7): balanced
+        * High (0.8-1.0): more diverse, less predictable
+    - top_p: Nucleus sampling threshold. Range [0.0-1.0]
+        * ~1.0: nearly all tokens considered (less restrictive)
+        * 0.5-0.9: more focused outputs
+    - top_k: Number of candidate tokens per step. Integer ≥1 or null (disabled)
+        * Low: constrained, possibly repetitive
+        * High: more variation
+    - num_ctx: Maximum context length (≤ model limit)
+    - repeat_penalty: Penalizes repetition. Range ≥1.0
+        * >1.0: discourages repetition
+    - format: Expected output format (e.g., 'json') 
+
+  ollama_deterministic: &ollama_deterministic
+    # All parameters are set for deterministic behavior to ensure reproducibility of outputs
+    model_name: "alibayram/medgemma:27b"  # Other option: "gemma3:27b"
+    temperature: 0.0  # 0.0 = deterministic
+    top_p: 1.0 # 1.0 = consider all tokens (deterministic)
+    top_k: 1  # 1 = only highest-probability token considered (deterministic)
+    num_ctx: 4096
+    repeat_penalty: 1.0  # Neutral; no extra penalty for repeated tokens
+    format: "json"
+ 
+  # another_model: 
+  #   model_name: ...
+  #   temperature: ...
+  #   
+
+other_settings:
+  llm_retries:  &llm_retries
+    max_attempts: 10  # Number of LLM call retries
+    delay_seconds: 3  # Delay in seconds between retry attempts
+
+# Used in extract_evidence.py
+extract_evidence:
+  run_settings: 
+    # Path to the prompt file relative to the project root
+    save_state_interval: 1  # State saving interval between processing steps (Default=1)
+    max_processing_steps: null # Maximum number of abstracts to process in a single run. The system resumes from the last checkpoint and processes up to this number per run. (Default=null)
+    llm_retries: 
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+
+# Used in normalized_graph.py
+normalize_graph:
+  run_settings: 
+    batch_size: 300  # Number of items to process per batch  (Default=300)
+    llm_retries:
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+  # Use a encoder compatible with Transformer Lib to clusterize nodes and normalize them
+  # Examples: 
+  #   "sentence-transformers/all-MiniLM-L6-v2"
+  #   "sentence-transformers/all-MiniLM-L12-v2"
+  #   "pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb"
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+refine_graph:
+  run_settings: 
+    # List of exact node names to remove (case-sensitive).
+    # Example: ["review", "NodeToDelete"]
+    remove_nodes: [] #["review"]
+
+    # List of exact relation names to remove (case-sensitive).
+    # Use null or an empty list [] if none.
+    remove_relations: [] 
+
+    # List of exact triplets to remove (case-sensitive).
+    # Format: "subject|relation|object"
+    remove_triplets: []
+
+    # Dictionary to unify node names.
+    # Maps a canonical name to a list of its variants.
+    # Lookup is case-insensitive, replacement preserves the canonical name's case.
+    # Format: "CanonicalName": ["variant1", "variant2"]
+    change_nodes: []
+    # Dictionary to unify relation names. Same logic as change_nodes.
+    # Format: "CanonicalRelation": ["variant1", "variant2"]
+    change_relations: []
+
+    # Dictionary to unify entire triplets.
+    # Most specific rule, applied before node/relation changes.
+    # Format: "NewSubject|NewRelation|NewObject": ["old_s|old_r|old_o", ...]
+    change_triplets: []
+
+

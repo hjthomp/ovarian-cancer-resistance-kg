@@ -1,0 +1,45 @@
+
+llm_types: 
+  ollama_deterministic: &ollama_deterministic
+    # All parameters are set for deterministic behavior to ensure reproducibility of outputs
+    model_name: "alibayram/medgemma:27b"  # Other option: "gemma3:27b"
+    temperature: 0.0  # 0.0 = deterministic
+    top_p: 1.0 # 1.0 = consider all tokens (deterministic)
+    top_k: 1  # 1 = only highest-probability token considered (deterministic)
+    num_ctx: 4096
+    repeat_penalty: 1.0  # Neutral; no extra penalty for repeated tokens
+    format: "json"
+
+other_settings:
+  llm_retries:  &llm_retries
+    max_attempts: 10  # Number of LLM call retries
+    delay_seconds: 3  # Delay in seconds between retry attempts
+
+ner:
+  categories: 
+    - GENE_PROTEIN
+    - RNA_DNA
+    - PATHWAY
+    - BIOLOGICAL_PROCESS
+    - DISEASE
+    - COMPOUND_DRUG
+  run_settings:
+    # Number of items to process per batch (Default=20)
+    # If the LLM gets stuck or slows down, try adjusting this value and restart the execution
+    llm_batch_size: 20  
+    embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_batch_size: 32  # Number of items to obtain clusters (Default=32)
+    llm_retries: 
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+
+  normalization:
+    # List of entity names to exclude from the graph
+    remove_entities: []
+
+    # format: "canonical_name": ["variant_1", "variant_2", ...]
+    change_entities: {}
+    
+    # Rules from graph refinement (abstract augmenter)
+    normalize_entities: {}

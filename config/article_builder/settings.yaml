@@ -1,0 +1,85 @@
+# --------------------------------------
+# Settings for the 'build_graph' module
+# --------------------------------------
+
+llm_types: 
+  _doc: |
+    Predefined models. Each model must define:
+    - model_name: LLM model identifier or path.
+    - temperature: Controls randomness. Range [0.0-1.0]
+        * Low (0.0-0.2): deterministic, minimal variation
+        * Medium (0.3-0.7): balanced
+        * High (0.8-1.0): more diverse, less predictable
+    - top_p: Nucleus sampling threshold. Range [0.0-1.0]
+        * ~1.0: nearly all tokens considered (less restrictive)
+        * 0.5-0.9: more focused outputs
+    - top_k: Number of candidate tokens per step. Integer ≥1 or null (disabled)
+        * Low: constrained, possibly repetitive
+        * High: more variation
+    - num_ctx: Maximum context length (≤ model limit)
+    - repeat_penalty: Penalizes repetition. Range ≥1.0
+        * >1.0: discourages repetition
+    - format: Expected output format (e.g., 'json') 
+
+  ollama_deterministic: &ollama_deterministic
+    # All parameters are set for deterministic behavior to ensure reproducibility of outputs
+    model_name: "alibayram/medgemma:27b"  # Other option: "gemma3:27b"
+    temperature: 0.0  # 0.0 = deterministic
+    top_p: 1.0 # 1.0 = consider all tokens (deterministic)
+    top_k: 1  # 1 = only highest-probability token considered (deterministic)
+    num_ctx: 4096  # Maximum context length
+    repeat_penalty: 1.0  # 1.0 is neutral; no extra penalty for repeated tokens
+    format: 'json'
+
+  # another_model: ...
+
+others:
+  llm_retries:  &llm_retries
+    max_attempts: 10  # Number of LLM call retries
+    delay_seconds: 3  # Delay in seconds between retry attempts
+  
+# Used in extract_evidence.py
+extract_evidence:
+  run_settings:
+    sentences_per_chunk: 30 # Number of sentences to include in each text chunk for LLM processing (Default=30)
+    max_chars_per_chunk: 2000 # Max number of characters per chunk; ensures the LLM input is not too long. (Default=2000)
+    chunks_to_process_limit: null  # Maximum number of chunks to process in a single run. Use 'null' to process all chunks
+    margin_top: 0 # Fraction of page height to ignore at the top (e.g., 0.1 = 10%). Removes headers.
+    margin_bottom: 0 # Fraction of page height to ignore at the bottom. Removes footers/page numbers.
+    remove_illegible_text: true # Detect and remove noise in text extraction. Useful in articles with tables.
+    llm_retries: 
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+
+# Used in extract_triplets.py
+extract_triplets:
+  run_settings:
+    # Number of items to process per batch (Default=5)
+    # If the LLM gets stuck or slows down, try adjusting this value and restart the execution
+    batch_size: 5 
+    batches_to_process_limit: null # Max batches to process in a run. 'null' = process all (Default=null)
+    llm_retries: 
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+
+# Used in normalize_graph.py
+normalize_graph:
+  run_settings:
+    # Batch size (default: 20)
+    # If the LLM gets stuck or slows down, try adjusting this value and restart the execution
+    batch_size: 20
+    llm_retries: 
+      <<: *llm_retries
+  model_settings: 
+    <<: *ollama_deterministic
+
+# Used in build_graph.py
+build_graph:
+  run_settings:
+    llm_retries:  
+      <<: *llm_retries
+    works_api_url: "https://api.crossref.org/works/" # API used to obtain article metadata
+  model_settings: 
+    <<: *ollama_deterministic

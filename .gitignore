@@ -1,0 +1,39 @@
+# --- Python & Environment ---
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# --- Secrets & Local Config ---
+.env
+.flaskenv
+*.log
+
+# --- Data & Large Files ---
+data/runs/
+data/experiments/
+data/graph_rag/
+data/raw/*
+!data/raw/articles/
+!data/raw/articles/**
+data/releases/*
+# Reproducible demo artifacts only
+!data/releases/example_kg.json
+
+# Temporary and miscellaneous files
+sandbox/
+
+# --- IDEs & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Web / Visualization ---
+node_modules/
+dist/
+build/

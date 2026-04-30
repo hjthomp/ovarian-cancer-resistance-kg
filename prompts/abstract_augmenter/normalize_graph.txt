@@ -1,0 +1,108 @@
+You are an expert in biomedical entity normalization, ontology alignment, and knowledge graph curation. 
+Your task is to analyze the following list of node names and propose a minimal yet safe normalization that reduces redundant variants while preserving the semantic integrity of the knowledge graph.
+
+These nodes come from a knowledge graph about ovarian cancer. They may include:
+- differences in capitalization,
+- small spelling inconsistencies,
+- paraphrased expressions referring to the same concept,
+- acronyms,
+- experimental conditions,
+- gene/protein names, RNA species, signaling pathways/axes, mutations, drugs, and clinical descriptors.
+
+Your output must strictly follow the normalization rules below.
+
+--------------------
+HARD RULES (must NEVER be violated)
+--------------------
+1. Do NOT merge entities unless they unambiguously refer to the exact same biomedical concept. If in doubt, keep them separate.
+2. Do NOT normalize gene/protein names, signaling pathway/axes, mutations, assays, biomarkers, cell lines, animal model species/strains, or drugs, unless differences are purely orthographic (case, hyphens, spacing).
+   - Correct: "BRCA-1" -> "BRCA1"
+   - Incorrect: "BRCA1" and "BRCA2" -> different entities, must remain separate.
+3. Do not introduce new acronyms, and avoid keeping ambiguous acronyms (e.g., "OC" for "ovarian cancer").
+4. Do not alter the biological meaning of any node. The graph contains subject–relation–object triplets and must stay semantically correct.
+5. Domain conventions for canonical forms:
+- Genes/proteins: uppercase (BRCA1, TP53, PPARGC1A).
+- RNA species: preserve standard biological casing (e.g., miR-21, let-7g, mRNA, lncRNA, circRNA).
+- Signaling pathways/axes: Respect the exact name ("PI3K/AKT pathway").
+- Mutations: Respect the exact name (e.g., R273H, S185G).
+- Drugs: lowercase (paclitaxel, cisplatin), except for experimental codes or registered brands (Olaparib, drug X123).
+- Clinical descriptors: lowercase (platinum-resistant, chemoresistant).
+- General biomedical processes: lowercase, except when they contain standard molecular acronyms (e.g., "DNA repair deficiency", "RNA processing")
+6. Convert descriptive or common words to lowercase.
+
+--------------------
+SOFT RULES (apply only if unambiguous)
+--------------------
+7. General rule for text case: Convert all words to lowercase unless domain conventions indicate otherwise (e.g., gene/protein names like BRCA1, TP53, ERCC1, MMR; miRNAs like let-7g; acronyms; signaling pathways with specific names).
+8. Normalize trivial spelling or punctuation differences (hyphens, plural vs singular if referring to the same concept, US/UK spelling).
+9. Merge variants only if differences are capitalization, punctuation, pluralization, or trivial wording.
+10. If in doubt, keep the entity unchanged and map it to itself.
+
+--------------------
+INVARIANT CHECKS (MANDATORY before output)
+--------------------
+- No merged group mixes different biological entities. 
+- Meaning of each concept is fully preserved.
+- Canonical forms follow domain conventions.
+- Each original node appears in exactly one list.
+- Output must be valid JSON without markdown.
+
+--------------------
+OUTPUT FORMAT (STRICT)
+--------------------
+Return ONE JSON object.
+Each key = canonical entity.
+Each value = list of original variants referring to that entity.
+Example of Output Structure:
+{
+  "ovarian cancer": [
+    "ovarian cancer",
+    "Ovarian cancer",
+    "Ovarian Carcinoma",
+    "Cancer of ovary"
+  ],
+  "BRCA1": [
+    "BRCA-1",
+    "Brca1 gene"
+  ],
+  "platinum-resistant": [
+    "platinum-resistant",
+    "Platinum Resistant",
+    "platinum resistant"
+  ],
+  "chemoresistance": [
+    "Chemotherapy resistance", 
+    "Chemoresistance",
+    "chemo-resistance",
+    "resistance to chemotherapeutic agents",
+    "Resistance to chemotherapy"
+  ],
+  "chemotherapy": [
+    "Chemotherapy"
+  ],
+  "paclitaxel": [
+    "Paclitaxel", 
+    "paclitaxel"
+  ],
+  "patient": [
+    "patient",
+    "Patient"
+  ],
+  "DNA repair": [
+    "DNA repair", 
+    "Dna repair"
+  ],
+  "poor prognosis": [
+    "poor prognosis"
+  ],
+  "prognosis": [
+    "prognosis"
+  ],
+  "prognostic prediction in OC patients": [
+    "Prognostic prediction in OC patients"
+  ]
+}
+
+---
+NODE LIST TO NORMALIZE:
+$node_list

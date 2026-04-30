@@ -1,0 +1,43 @@
+llm_types: 
+  ollama_deterministic: &ollama_deterministic
+    # All parameters are set for deterministic behavior to ensure reproducibility of outputs
+    model_name: "alibayram/medgemma:27b"  # Other option: "gemma3:27b"
+    temperature: 0.0  # 0.0 = deterministic
+    top_p: 1.0 # 1.0 = consider all tokens (deterministic)
+    top_k: 1  # 1 = only highest-probability token considered (deterministic)
+    num_ctx: 4096
+    repeat_penalty: 1.0  # Neutral; no extra penalty for repeated tokens
+    format: "json"
+ 
+other_settings:
+  llm_retries:  &llm_retries
+    max_attempts: 10  # Number of LLM call retries
+    delay_seconds: 3  # Delay in seconds between retry attempts
+
+run_settings:
+  llm_retries:
+    max_attempts: 5
+    delay_seconds: 2
+model_settings: 
+  <<: *ollama_deterministic
+
+# Pipeline settings for GraphRAG
+graph_rag_config:
+  retrieval:
+    enabled: true
+    db_path: "data/vector_db"
+    top_k: 15
+    embedding_model: "all-MiniLM-L6-v2"
+    rerank_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    use_reranking: true
+  use_evidence: true
+
+benchmark:
+  sample_size: 5 # For paper: 500
+  options_per_question: 5
+  distractors:
+    n_hard: 2    # Most similar by embeddings (same semantic category)
+    n_medium: 1  # Same theme/cluster (technical context)
+    n_easy: 1    # Random from other clusters (random noise)
+  embedding_model: "all-MiniLM-L6-v2"
+  seed: 42

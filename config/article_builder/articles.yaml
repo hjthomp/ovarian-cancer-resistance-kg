@@ -1,0 +1,10 @@
+# ------------------------------------------------------------------------
+# Configuration for all articles to be processed in the 'article_builder' module
+# ------------------------------------------------------------------------
+
+Aslam2021:       
+  pdf_path: "data/raw/articles/Aslam2021.pdf"
+  doi: "10.1016/j.semcancer.2021.08.005"
+Ma2025:       
+  pdf_path: "data/raw/articles/Ma2025.pdf"
+  doi: "10.1186/s13048-025-01921-x"

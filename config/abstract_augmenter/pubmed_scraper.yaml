@@ -1,0 +1,29 @@
+search_params:
+    start_year: 2025
+    end_year: 2025
+    main_terms:
+      - "ovarian cancer"
+      - "ovarian carcinoma"
+      - "ovary cancer"
+    secondary_terms: 
+      - "resistance"
+      - "chemoresistance"
+      - "drug resistance"
+      - "treatment resistance"
+      - "therapy resistance"
+    # - ...
+    user_query: null   # Use to define a particular query instead previous params
+    filters:
+      required_keywords_in_title: null # Word list that included in title or null
+      excluded_publication_types: # Type list of publications to exclude or null
+        - "Review"
+        - "Systematic Review"
+        - "Scientific Integrity Review"
+        - "Scoping Review"
+        - "Meta-Analysis"
+        - "Retracted Publication"
+api_params: 
+  base_url: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+  esearch_retmax: 100 # Production setting: 100000
+  efetch_batch_size: 200
+  sleep_seconds: 0.8
