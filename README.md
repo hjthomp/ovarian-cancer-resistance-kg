@@ -216,11 +216,7 @@ To access:
 2.  Select option `[5] Interactive Visualization (Web)`. This will automatically open the visualization in your default browser.
 3.  Alternatively, you can directly open `visualization/index.html` in your browser and load a graph from `data/releases/`.
 
-<<<<<<< HEAD
 ![Tool demo](assets/tool_demo.gif)
-=======
-![Demo](assets/tool_demo.mp4)
->>>>>>> 014c85e218664288754b6cadcaa19ce4fe114d64
 
 ---
 
@@ -233,7 +229,6 @@ To access:
 2.  Start the main menu (`python -m src.main`).
 3.  Select option `[6] GraphRAG Interface (Streamlit)`. This will launch the Streamlit application and open it in your browser.
 
-![Demo](assets/graphrag_demo.mp4)
 
 ![GraphRAG demo](assets/graphrag_demo.gif)
 
