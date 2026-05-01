@@ -1,4 +1,4 @@
-# Ovarian Cancer Resistance Knowledge Graph (KG)
+# Ovarian Cancer Resistance Knowledge Graph
 
 This project implements a complete pipeline for the construction, enrichment, analysis, and visualization of a Knowledge Graph (KG) focused on resistance mechanisms in ovarian cancer.
 
@@ -216,10 +216,7 @@ To access:
 2.  Select option `[5] Interactive Visualization (Web)`. This will automatically open the visualization in your default browser.
 3.  Alternatively, you can directly open `visualization/index.html` in your browser and load a graph from `data/releases/`.
 
-
-<video controls width="800">
-  <source src="assets/tool_demo.mp4" type="video/mp4">
-</video>
+![Tool demo](assets/tool_demo.gif)
 
 ---
 
@@ -233,10 +230,8 @@ To access:
 3.  Select option `[6] GraphRAG Interface (Streamlit)`. This will launch the Streamlit application and open it in your browser.
 
 
+![GraphRAG demo](assets/graphrag_demo.gif)
 
-<video controls width="800">
-  <source src="assets/graphrag_demo.mp4" type="video/mp4">
-</video>
 ---
 
 ## 🔬 Experiments & Analysis Module
