@@ -232,6 +232,7 @@ To access:
 
 ![GraphRAG demo](assets/graphrag_demo.gif)
 
+
 ---
 
 ## 🔬 Experiments & Analysis Module
