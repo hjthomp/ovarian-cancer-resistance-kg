@@ -15,7 +15,7 @@ This repository presents an evidence-based knowledge graph (KG) framework for st
 -   [GraphRAG (Chat with the Graph)](#-graphrag-chat-with-the-graph)
 -   [Experiments & Analysis Module](#-experiments--analysis-module)
 - [Citation](#-citation)
-- [Contact](#-contact)
+- [License](#-license)
 
 
 
@@ -253,8 +253,8 @@ If you find this work useful, please cite:
 
 ```bibtex
 @article{thompson2026,
-  title={Your Paper Title},
-  author={Your Name},
+  title={Title},
+  author={Name},
   journal={...},
   year={2026}
 }
@@ -262,3 +262,7 @@ If you find this work useful, please cite:
 
 ## 📬 Contact
 [hjthompson@unsl.edu.ar](mailto:hjthompson@unsl.edu.ar)
+
+## 📄 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
