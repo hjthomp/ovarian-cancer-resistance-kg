@@ -50,7 +50,7 @@ DEFAULT_NUM_CTX = app_config.get("num_ctx", 4096)
 st.set_page_config(layout="wide", page_title="GraphRAG-based reasoning framework for E-KGs")
 
 st.title("GraphRAG-based reasoning framework for E-KGs")
-st.markdown("Interactively experiment with Retrieval, Prompts, and LLM configurations using `rag_pipeline.py`.")
+st.markdown("Experiment interactively with retrieval, prompts, and LLM configurations using `rag_pipeline.py`.")
 
 # --- Load Prompts (with fallback) ---
 prompts_dir = PROJECT_ROOT / "prompts" / "graph_rag"

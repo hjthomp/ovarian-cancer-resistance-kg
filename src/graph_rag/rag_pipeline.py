@@ -137,7 +137,7 @@ class GraphRAGPipeline:
             print(f"\n[Retrieval] Searching graph for: '{question[:50]}...'")
             q_emb = self.embed_model.encode([question], convert_to_numpy=True)
             
-            # Si usamos re-ranking, pedimos más candidatos inicialmente (rerank_top_k)
+            # If re-ranking is used, more candidates are initially requested (rerank_top_k)
             fetch_k = self.rerank_top_k if self.use_reranking else self.top_k
             results = self.collection.query(query_embeddings=q_emb.tolist(), n_results=fetch_k)
             
@@ -146,11 +146,11 @@ class GraphRAGPipeline:
 
             # 1.1 Re-ranking step
             if self.use_reranking and retrieved_metadatas and hasattr(self, 'reranker'):
-                # Formatear pares (pregunta, documento) para el Cross-Encoder
+                # Format pairs (question, document) for the Cross-Encoder
                 pairs = [[question, doc] for doc in retrieved_documents]
                 scores = self.reranker.predict(pairs)
                 
-                # Combinar, ordenar por score y recortar al top_k final
+                # Combine, sort by score, and trim to the final top_k
                 scored_results = sorted(zip(scores, retrieved_metadatas), key=lambda x: x[0], reverse=True)
                 retrieved_metadatas = [meta for score, meta in scored_results[:self.top_k]]
                 

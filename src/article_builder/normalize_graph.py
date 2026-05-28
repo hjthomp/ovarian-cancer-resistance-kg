@@ -60,10 +60,10 @@ def normalize_cluster_with_llm(
                 for t_id in ids:
                     try:
                         idx = int(t_id)
-                        if 0 <= idx < len(batch):  # <-- Chequea rango
+                        if 0 <= idx < len(batch):  # <-- Check range
                             normalized_ids.append(idx)
                     except (ValueError, TypeError):
-                        # Si es algo raro como "id_3" o None -> ignorar
+                        # If it's something unusual like "id_3" or None -> ignore
                         logging.warning(f"Invalid evidence ID received from LLM: {t_id}")
                         continue
 
@@ -171,7 +171,7 @@ def consolidate_clusters(find_files: Path) -> Dict[str, List[Dict[str, Any]]]:
                 # Ensure triplets is iterable (list of dicts)
                 if isinstance(triplets, list):
                     # final_graph.setdefault(cluster_label, []).extend(triplets[0])
-                    final_graph.setdefault(cluster_label, []).extend(chain.from_iterable(triplets)) # Esto concatena todos los batches en una sola secuencia
+                    final_graph.setdefault(cluster_label, []).extend(chain.from_iterable(triplets)) # Concatenate all batches into a single sequence
                 else:
                     logging.warning(f"{cluster_file} cluster {cluster_label} has unexpected format")   
 

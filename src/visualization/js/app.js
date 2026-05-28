@@ -1463,8 +1463,8 @@
                     if (!focusedElements.links.has(d)) return "none";
                     if (!focusRespectsLOD) return null;
 
-                    // Si estamos respetando LOD (Vista Comunidad), ocultar arcos si estamos en la vista general
-                    // Solo mostrarlos si el usuario hace zoom intencional hacia adentro (1.2x del zoom base)
+                    // If we are respecting LOD (Community View), hide arcs if we are in the overview view
+                    // Only show them if the user intentionally zooms in (1.2x of the base zoom).
                     if (k < focusBaseScale * 1.2) return "none";
                 }
 
@@ -1867,7 +1867,7 @@
                 updateComponentLayout(true); // Turn on
             }
 
-            // Restaurar enfriamiento lento para el reordenamiento global
+            // Restore slow cooling for global reordering
             simulation.alphaDecay(0.05);
             simulation.alpha(1).restart(); // Reheat the simulation
             resetView();

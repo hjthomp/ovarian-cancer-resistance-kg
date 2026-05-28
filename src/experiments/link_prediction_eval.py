@@ -195,11 +195,11 @@ def calculate_metrics(
                     hits_counts[k] += 1
             mrr += (1.0 / rank)
 
-        # Análisis de errores en el Top-1
+        # Error analysis in the Top-1
         if rank != 1:
             et = error_type if error_type in ["hard", "medium", "easy"] else "unknown"
             confusion[et]["count"] += 1
-            # Guardamos solo el ID para que el JSON no sea tan extenso
+            # Save only the ID to avoid a long JSON file
             confusion[et]["samples"].append(res.get("sample_id"))
     
     metrics = OrderedDict()
@@ -233,7 +233,7 @@ def calculate_metrics_for_mode(
         if isinstance(status, dict) and "ranking" in status:
             successful_count += 1
             
-        # Si hay una lista de índices comunes (Fair Comparison), ignoramos lo que esté fuera
+        # If there is a list of common indexes (Fair Comparison), we ignore anything outside of it
         if common_indices is not None and i not in common_indices:
             continue
             
@@ -292,7 +292,7 @@ def recalculate_metrics_tool() -> None:
     save_json(results, run_dir / "results.json")
     logging.info("Metrics recalculated and results.json updated.")
     
-    # Imprimir resumen
+    # Print summary
     print(f"\n=== RECALCULATED RESULTS ({run_dir.name}) ===")
     for mode in ["base", "graph_rag"]:
         m = results["metrics"].get(mode, {})
@@ -461,7 +461,7 @@ def run_link_prediction_eval() -> None:
                     if recovery_action == "Skip this sample for this model":
                         results["samples"][i][mode] = "SKIPPED"
                         
-                        # Recalcular métricas con Fair Comparison
+                        # Recalculate metrics with Fair Comparison
                         common = [idx for idx, s in enumerate(results["samples"]) 
                                   if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
                                      (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
@@ -480,7 +480,7 @@ def run_link_prediction_eval() -> None:
                 results["samples"][i][mode] = "PROCESSING"
                 save_json(results, run_dir / "results.json")
 
-                # Enumeramos las opciones del 1 al 5 usando enumerate
+                # We enumerate the options from 1 to 5 
                 options_text = "\n".join([f"{idx+1}. {opt}" for idx, opt in enumerate(item['shuffled_options'])])
                 full_question = f"Relationship: [{item['subject']}] -> [{item['relation']}] -> ?\n\nOptions:\n{options_text}"
             
@@ -488,11 +488,11 @@ def run_link_prediction_eval() -> None:
                 em.add_llm_stats(stats)
                 
                 ranking = response_data.get("ranking", [])
-                # --- Normalización y Validación del Ranking ---
+                # --- Ranking Normalization and Validation ---
                 ranking_raw = response_data.get("ranking", [])
                 if not isinstance(ranking_raw, list): ranking_raw = []
 
-                # Creamos un mapa de normalización (lowercase) para comparar sin errores de formato
+                # Create a normalization (lowercase) map for comparison without formatting errors
                 norm_map = {opt.strip().lower(): opt for opt in item['shuffled_options']}
                 ranking = []
                 for r_item in ranking_raw:
@@ -527,7 +527,7 @@ def run_link_prediction_eval() -> None:
                               if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
                                  (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
 
-                    # Actualizar métricas individuales
+                    # Update individual metrics
                     for m_key in ["base", "graph_rag"]:
                         results["metrics"][m_key] = calculate_metrics_for_mode(
                             results["samples"], benchmark, m_key, HITS_LIST, common_indices=common)
@@ -562,5 +562,4 @@ def run_link_prediction_eval() -> None:
         print(f"\nResults and metadata saved in: {run_dir}")
 
 if __name__ == "__main__":
-    # La función ahora gestiona su propia selección de modo y KG internamente
     run_link_prediction_eval()
