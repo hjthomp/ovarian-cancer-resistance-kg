@@ -248,10 +248,10 @@ Select option `[4] Experiments & Analysis` from the main menu.
 If you find this work useful, please cite:
 
 ```bibtex
-@article{thompson2026,
-  title={Title},
-  author={Name},
-  journal={...},
+@article{thompson2026ekg,
+  title={An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance},
+  author={Thompson, Horacio and Conforti, Rocío A. and Andujar, Sebastián A. and Casais, Marilina and Telleria, Carlos M. and Errecalde, Marcelo},
+  journal={Submitted to MDPI},
   year={2026}
 }
 ```
