@@ -17,7 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from src.utils.io import load_json, save_json, load_yaml, load_txt
 from src.utils.constants import DATA_DIR, CONFIG_DIR, PROMPT_DIR
-from src.graph_rag.rag_pipeline import GraphRAGPipeline
+from src.graph_rag.rag_pipeline import GraphRAGPipeline, ClassicRAGPipeline
 from src.utils.execution_measures import ExecutionMeasures
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -276,14 +276,23 @@ def recalculate_metrics_tool() -> None:
     
     logging.info(f"Recalculating metrics for {run_dir.name}...")
     
-    # Fair Comparison: Identificar muestras que AMBOS modelos completaron con éxito
-    common = [idx for idx, s in enumerate(results["samples"]) 
-              if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
-                 (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+    # Fair Comparison: Identify samples successfully completed by all models
+    has_classic = any(s.get("classic_rag") is not None for s in results.get("samples", []))
+    if has_classic:
+        common = [idx for idx, s in enumerate(results["samples"]) 
+                  if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                     (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"]) and
+                     (isinstance(s.get("classic_rag"), dict) and "ranking" in s["classic_rag"])]
+        modes = ["base", "graph_rag", "classic_rag"]
+    else:
+        common = [idx for idx, s in enumerate(results["samples"]) 
+                  if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                     (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+        modes = ["base", "graph_rag"]
     logging.info(f"Fair Comparison: Using {len(common)} common samples for metrics.")
 
     # 1. Per-mode metrics
-    for m_key in ["base", "graph_rag"]:
+    for m_key in modes:
         if results["samples"]:
             results["metrics"][m_key] = calculate_metrics_for_mode(
                 results["samples"], benchmark, m_key, HITS_LIST, common_indices=common
@@ -294,8 +303,10 @@ def recalculate_metrics_tool() -> None:
     
     # Print summary
     print(f"\n=== RECALCULATED RESULTS ({run_dir.name}) ===")
-    for mode in ["base", "graph_rag"]:
+    for mode in results["metrics"].keys():
         m = results["metrics"].get(mode, {})
+        if not m:
+            continue
         fair_total = m.get('fair_comparison_samples', 0)
         print(f"\nMode: {mode} (Processed: {m.get('processed_samples')}, Denominator: {fair_total})")
         for k in HITS_LIST:
@@ -364,11 +375,11 @@ def run_link_prediction_eval() -> None:
         save_json(benchmark, run_dir / "benchmark.json")
         
         results = {
-            "metrics": {"base": {}, "graph_rag": {}},
+            "metrics": {"base": {}, "graph_rag": {}, "classic_rag": {}},
             "samples": []
         }
         for item in benchmark:
-            results["samples"].append({"sample_id": item["sample_id"], "base": None, "graph_rag": None})
+            results["samples"].append({"sample_id": item["sample_id"], "base": None, "graph_rag": None, "classic_rag": None})
         
     else:
         # Resume Run
@@ -381,24 +392,48 @@ def run_link_prediction_eval() -> None:
         metadata = load_json(run_dir / "metadata.json")
         benchmark = load_json(run_dir / "benchmark.json")
         original_config = metadata['config']
+        
+        # Enforce that classic_rag_config is present in metadata config
+        if "classic_rag_config" not in original_config:
+            original_config["classic_rag_config"] = current_config.get("classic_rag_config", {})
+            metadata["config"] = original_config
+            save_json(metadata, run_dir / "metadata.json")
+            
         kg_path = RELEASES_DIR / metadata['kg_file']
         
         if (run_dir / "results.json").exists():
             results = load_json(run_dir / "results.json")
+            
+            # Backfill classic_rag fields if resuming a legacy run
+            if "classic_rag" not in results["metrics"]:
+                results["metrics"]["classic_rag"] = {}
+            for s in results["samples"]:
+                if "classic_rag" not in s:
+                    s["classic_rag"] = None
+
             # Refresh metrics for all modes upon resume to ensure new logic is applied
             logging.info("Refreshing metrics with Fair Comparison logic...")
             
-            common = [idx for idx, s in enumerate(results["samples"]) 
-                      if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
-                         (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+            has_classic = any(s.get("classic_rag") is not None for s in results.get("samples", []))
+            if has_classic:
+                common = [idx for idx, s in enumerate(results["samples"]) 
+                          if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                             (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"]) and
+                             (isinstance(s.get("classic_rag"), dict) and "ranking" in s["classic_rag"])]
+                modes = ["base", "graph_rag", "classic_rag"]
+            else:
+                common = [idx for idx, s in enumerate(results["samples"]) 
+                          if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                             (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+                modes = ["base", "graph_rag"]
 
-            for m_key in ["base", "graph_rag"]:
+            for m_key in modes:
                 if results["samples"]:
                     results["metrics"][m_key] = calculate_metrics_for_mode(
                         results["samples"], benchmark, m_key, HITS_LIST, common_indices=common)
             save_json(results, run_dir / "results.json")
         else:
-            results = {"metrics": {"base": {}, "graph_rag": {}}, "samples": [{"sample_id": i+1, "base": None, "graph_rag": None} for i in range(len(benchmark))]}
+            results = {"metrics": {"base": {}, "graph_rag": {}, "classic_rag": {}}, "samples": [{"sample_id": i+1, "base": None, "graph_rag": None, "classic_rag": None} for i in range(len(benchmark))]}
 
     # Setup logic
     bench_cfg = original_config['benchmark']
@@ -429,10 +464,26 @@ def run_link_prediction_eval() -> None:
         "retrieval": retrieval_cfg,
         "prompt": {"use_evidence": original_config['graph_rag_config'].get("use_evidence", False)},
     })
+    
+    classic_rag_config = original_config.get("classic_rag_config")
+    if not classic_rag_config:
+        classic_rag_config = current_config.get("classic_rag_config", {})
+    classic_cfg = base_cfg.copy()
+    classic_cfg.update({
+        "name": "Classic_RAG_LLM",
+        "retrieval": {
+            "enabled": classic_rag_config.get("retrieval", {}).get("enabled", True),
+            "db_path": str(db_path_session),
+            "embedding_model": classic_rag_config.get("retrieval", {}).get("embedding_model", bench_cfg.get("embedding_model")),
+            "top_k": classic_rag_config.get("retrieval", {}).get("top_k", 15)
+        },
+        "data_sources": classic_rag_config.get("data_sources", {})
+    })
 
     pipelines = {
         "base": GraphRAGPipeline(base_cfg),
-        "graph_rag": GraphRAGPipeline(rag_cfg)
+        "graph_rag": GraphRAGPipeline(rag_cfg),
+        "classic_rag": ClassicRAGPipeline(classic_cfg)
     }
 
     execution_measures = metadata["execution_measures"]
@@ -446,7 +497,7 @@ def run_link_prediction_eval() -> None:
         for i, item in enumerate(benchmark):
             logging.info(f" Processing Sample {i+1}/{len(benchmark)}")
             
-            for mode in ["base", "graph_rag"]:
+            for mode in ["base", "graph_rag", "classic_rag"]:
                 pipeline = pipelines[mode]
                 current_status = results["samples"][i].get(mode)
                 
@@ -462,11 +513,20 @@ def run_link_prediction_eval() -> None:
                         results["samples"][i][mode] = "SKIPPED"
                         
                         # Recalculate metrics with Fair Comparison
-                        common = [idx for idx, s in enumerate(results["samples"]) 
-                                  if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
-                                     (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+                        has_classic = any(s.get("classic_rag") is not None for s in results.get("samples", []))
+                        if has_classic:
+                            common = [idx for idx, s in enumerate(results["samples"]) 
+                                      if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                                         (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"]) and
+                                         (isinstance(s.get("classic_rag"), dict) and "ranking" in s["classic_rag"])]
+                            modes = ["base", "graph_rag", "classic_rag"]
+                        else:
+                            common = [idx for idx, s in enumerate(results["samples"]) 
+                                      if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                                         (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+                            modes = ["base", "graph_rag"]
 
-                        for m_key in ["base", "graph_rag"]:
+                        for m_key in modes:
                             results["metrics"][m_key] = calculate_metrics_for_mode(
                                 results["samples"], benchmark, m_key, HITS_LIST, common_indices=common)
                         
@@ -522,13 +582,22 @@ def run_link_prediction_eval() -> None:
                 
                 # Recalculate metrics and Save final result for this step
                 if (i + 1) % 1 == 0 or (i + 1) == len(benchmark):
-                    # Fair Comparison dinámica
-                    common = [idx for idx, s in enumerate(results["samples"]) 
-                              if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
-                                 (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+                    # Fair dynamic comparison
+                    has_classic = any(s.get("classic_rag") is not None for s in results.get("samples", []))
+                    if has_classic:
+                        common = [idx for idx, s in enumerate(results["samples"]) 
+                                  if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                                     (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"]) and
+                                     (isinstance(s.get("classic_rag"), dict) and "ranking" in s["classic_rag"])]
+                        modes = ["base", "graph_rag", "classic_rag"]
+                    else:
+                        common = [idx for idx, s in enumerate(results["samples"]) 
+                                  if (isinstance(s.get("base"), dict) and "ranking" in s["base"]) and 
+                                     (isinstance(s.get("graph_rag"), dict) and "ranking" in s["graph_rag"])]
+                        modes = ["base", "graph_rag"]
 
                     # Update individual metrics
-                    for m_key in ["base", "graph_rag"]:
+                    for m_key in modes:
                         results["metrics"][m_key] = calculate_metrics_for_mode(
                             results["samples"], benchmark, m_key, HITS_LIST, common_indices=common)
                     
@@ -541,8 +610,10 @@ def run_link_prediction_eval() -> None:
         save_json(metadata, run_dir / "metadata.json")
         
         print("\n=== EVALUATION RESULTS ===")
-        for mode in ["base", "graph_rag"]:
+        for mode in results["metrics"].keys():
             m = results["metrics"].get(mode, {})
+            if not m:
+                continue
             processed = m.get("processed_samples", 0)
             skipped = m.get("skipped_samples", 0)
             

@@ -41,3 +41,14 @@ benchmark:
     n_easy: 1    # Random from other clusters (random noise)
   embedding_model: "all-MiniLM-L6-v2"
   seed: 42
+
+# Pipeline settings for Classic RAG baseline
+classic_rag_config:
+  retrieval:
+    enabled: true
+    db_path: "data/vector_db"
+    top_k: 5  # Balanced top-k to fit within the context window
+    embedding_model: "all-MiniLM-L6-v2"
+  data_sources: # Processed data from which to build the chunks 
+    abstracts_file: "data/raw/abstracts/pubmed_2026-04-29_11-12-20.json" 
+    articles_runs_dir: "data/runs/article_builder/2026-04-29_01-51-19"
