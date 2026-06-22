@@ -1,6 +1,6 @@
 """
 Evaluates Link Prediction (Triple Completion) performance using Multiple Choice Questions (MCQ).
-Compares Base LLM vs. GraphRAG by generating categorized distractors (Hard/Medium/Easy)
+Compares Base LLM, Classic RAG, and GraphRAG by generating categorized distractors (Hard/Medium/Easy)
 and calculating ranking metrics like Hits@k and Mean Reciprocal Rank (MRR).
 """
 
