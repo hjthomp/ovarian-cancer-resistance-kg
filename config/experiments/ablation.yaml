@@ -1,0 +1,16 @@
+# Settings for the ablation study (src/experiments/ablation.py)
+
+# List of distance thresholds for Agglomerative Clustering.
+# These values determine how aggressively nodes are grouped together.
+# Lower values create more, smaller, and tighter clusters.
+# Higher values create fewer, larger, and looser clusters.
+thresholds: [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+
+# The sentence-transformer model used to generate embeddings for semantic sorting.
+embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+# The maximum number of nodes to include in a single batch sent to the LLM (hard limit).
+batch_size: 300
+
+# The context window size of the model, used for dynamic batching calculations.
+num_ctx: 4096

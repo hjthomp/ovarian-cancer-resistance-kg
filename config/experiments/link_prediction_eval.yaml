@@ -1,7 +1,10 @@
 llm_types: 
   ollama_deterministic: &ollama_deterministic
     # All parameters are set for deterministic behavior to ensure reproducibility of outputs
-    model_name: "alibayram/medgemma:27b"  # Other option: "gemma3:27b"
+    model_name: "alibayram/medgemma:27b" 
+    # "alibayram/medgemma:27b"
+    # "qwen2.5:14b-instruct" 
+    # "llama3.1:8b-instruct-q8_0"
     temperature: 0.0  # 0.0 = deterministic
     top_p: 1.0 # 1.0 = consider all tokens (deterministic)
     top_k: 1  # 1 = only highest-probability token considered (deterministic)

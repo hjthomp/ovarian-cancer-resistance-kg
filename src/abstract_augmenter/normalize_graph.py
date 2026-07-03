@@ -71,7 +71,7 @@ def get_all_unique_nodes(graph_data: Dict[str, List[Dict[str, Any]]]) -> List[st
     logging.info(f"Found {len(node_list)} unique nodes in the entire graph.")
     return node_list
 
-def sort_nodes_semantically(nodes: List[str], model_name: str) -> List[str]:
+def sort_nodes_semantically(nodes: List[str], model_name: str, distance_threshold: float = 1.5) -> List[str]:
     """
     Sorts nodes based on semantic similarity using embeddings and clustering.
     Falls back to token-based sorting if libraries are missing.
@@ -87,9 +87,8 @@ def sort_nodes_semantically(nodes: List[str], model_name: str) -> List[str]:
         embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
         
         # Cluster nodes that are semantically close
-        # distance_threshold=1.5 is roughly equivalent to a cosine similarity check
         clustering = AgglomerativeClustering(
-            n_clusters=None, distance_threshold=1.5, metric='euclidean', linkage='ward'
+            n_clusters=None, distance_threshold=distance_threshold, metric='euclidean', linkage='ward'
         )
         labels = clustering.fit_predict(embeddings)
         

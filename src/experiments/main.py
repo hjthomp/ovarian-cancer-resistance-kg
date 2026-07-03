@@ -15,6 +15,8 @@ from .link_prediction_eval import run_link_prediction_eval
 from .ner_pipeline import main as ner_pipeline_main
 from .plot_ner_results import run_analysis_generator
 from .plot_wordclouds import run_wordclouds
+from .ablation import run_ablation_study
+from .plot_ablation import run_plot_ablation
 
 # Configure logging (if not already configured by the root main)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,6 +34,8 @@ def main() -> None:
         print("  [5] NER Pipeline (Extraction & Normalization)")
         print("  [6] Plot NER Results")
         print("  [7] Plot WordClouds")
+        print("  [8] Ablation Study")
+        print("  [9] Plot Ablation Study Results")
         print("  ---")
         print("  [R] Return to main menu")
         print("  [Q] Exit Application")
@@ -54,6 +58,10 @@ def main() -> None:
                 run_analysis_generator()
             elif choice == '7':
                 run_wordclouds()
+            elif choice == '8':
+                run_ablation_study()
+            elif choice == '9':
+                run_plot_ablation()
             elif choice == 'R':
                 break
             elif choice == 'Q':

@@ -134,7 +134,7 @@ class OllamaClient(BaseLLM):
 def get_llm_client(settings: dict) -> BaseLLM:
     model_name = settings["model_name"]
     
-    if any(m in model_name for m in ["gemma"]):
+    if any(m in model_name for m in ["gemma", "qwen", "llama"]):
         return OllamaClient(settings)
     else:
         raise ValueError(f"Model name not supported: {model_name}")
