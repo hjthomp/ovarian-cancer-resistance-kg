@@ -211,9 +211,15 @@ class GraphRAGPipeline:
 
         # 4. Evaluation (Faithfulness)
         if evaluate and "answer" in data:
-            print(f"[Eval] Auditing faithfulness score...")
-            eval_data = self._evaluate_faithfulness(question, context_text, data["answer"])
-            data["evaluation"] = eval_data
+            print(f"[Eval] Auditing Faithfulness and Relevance scores...")
+            faithfulness_data = self._evaluate_faithfulness(question, context_text, data["answer"])
+            relevance_data = self._evaluate_relevance(question, data["answer"])
+            
+            # Merge evaluation results with distinct keys to avoid overwriting 'reasoning'
+            data["evaluation"] = {
+                "faithfulness_score": faithfulness_data.get("faithfulness_score"), "faithfulness_reasoning": faithfulness_data.get("reasoning"),
+                "relevance_score": relevance_data.get("relevance_score"), "relevance_reasoning": relevance_data.get("reasoning")
+            }
 
         print(f"[Pipeline] Run completed successfully.")
         return self.llm_client.get_stats(), data
@@ -234,6 +240,24 @@ class GraphRAGPipeline:
             return json.loads(eval_response)
         except Exception as e:
             return {"faithfulness_score": 0.0, "reasoning": f"Evaluation failed: {str(e)}"}
+
+    def _evaluate_relevance(self, question: str, answer: str) -> Dict[str, Any]:
+        """Evaluates if the LLM answer is relevant to the original question."""
+        eval_prompt_path = PROJECT_ROOT / "prompts/graph_rag/evaluate_relevance.txt"
+        
+        try:
+            if not eval_prompt_path.exists():
+                raise FileNotFoundError(f"Evaluation prompt file not found at {eval_prompt_path}")
+
+            template_str = eval_prompt_path.read_text(encoding="utf-8")
+            template = Template(template_str)
+            # Note: Context is not needed for relevance
+            eval_prompt = template.substitute(question=question, answer=answer)
+            
+            eval_response = self.llm_client.generate(prompt=eval_prompt)
+            return json.loads(eval_response)
+        except Exception as e:
+            return {"relevance_score": 0.0, "reasoning": f"Relevance evaluation failed: {str(e)}"}
 
 
 class ClassicRAGPipeline:
@@ -413,4 +437,3 @@ class ClassicRAGPipeline:
         data["context_triplets"] = []
         
         return self.llm_client.get_stats(), data
-

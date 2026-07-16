@@ -1,0 +1,23 @@
+You are an expert evaluator. Your task is to evaluate if the generated answer is relevant to the original question.
+Ignore the context and focus only on the question-answer pair.
+
+QUESTION: $question
+GENERATED ANSWER: $answer
+
+TASK:
+Evaluate if the GENERATED ANSWER directly addresses the original QUESTION.
+- A relevant answer tries to answer the question directly.
+- An irrelevant answer does not answer the question, even if it is factually correct.
+
+SCORING SCALE (0.0 to 1.0):
+- 1.0: The answer is a direct and complete response to the question.
+- 0.6 - 0.9: The answer addresses the question but is incomplete or contains some extra, unrelated information.
+- 0.1 - 0.5: The answer is related to the question but does not directly answer it.
+- 0.0: The answer is completely irrelevant to the question.
+
+RESPONSE FORMAT:
+Return ONLY a JSON object:
+{
+    "relevance_score": float,
+    "reasoning": "A brief explanation for your score."
+}

@@ -47,9 +47,9 @@ DEFAULT_RERANK_K = app_config.get("rerank_top_k", 100)
 DEFAULT_USE_RERANK = app_config.get("use_reranking", True)
 DEFAULT_NUM_CTX = app_config.get("num_ctx", 4096)
 
-st.set_page_config(layout="wide", page_title="GraphRAG-based reasoning framework for E-KGs")
+st.set_page_config(layout="wide", page_title="Reasoning framework for E-KGs")
 
-st.title("GraphRAG-based reasoning framework for E-KGs")
+st.title("Reasoning framework for E-KGs")
 st.markdown("Experiment interactively with retrieval, prompts, and LLM configurations using `rag_pipeline.py`.")
 
 # --- Load Prompts (with fallback) ---
@@ -158,7 +158,7 @@ with st.sidebar:
                 st.caption(f"🔍 **Two-stage flow:** Fetch {rerank_top_k} → Rerank → Keep top {top_k}")
             
             use_evidence = st.checkbox("Use Evidence", value=False, help="Include evidence text in the context sent to LLM")
-            enable_eval = st.checkbox("🛡️ Auto-Evaluate Fidelity", value=False, help="Run a second pass to verify if the answer is grounded in the graph.")
+            enable_eval = st.checkbox("🛡️ Evaluate Answer Quality (Faithfulness & Relevance)", value=False, help="Run an LLM-as-a-judge pass to evaluate the answer's Faithfulness (groundedness in context) and Relevance (relation to the question).")
         else:
             top_k = DEFAULT_TOP_K
             use_evidence = False
@@ -292,12 +292,20 @@ if 'last_run' in st.session_state:
     # Display Evaluation Score AFTER the answer
     if "evaluation" in result:
         eval_res = result["evaluation"]
-        score = eval_res.get("faithfulness_score", 0.0)
-        reason = eval_res.get("reasoning", "")
+        faith_score = eval_res.get("faithfulness_score")
+        faith_reason = eval_res.get("faithfulness_reasoning", "No reasoning provided.")
+        relevance_score = eval_res.get("relevance_score")
+        relevance_reason = eval_res.get("relevance_reasoning", "No reasoning provided.")
+
+        # Display Faithfulness Score
+        if faith_score is not None:
+            color = "green" if faith_score >= 0.8 else "orange" if faith_score >= 0.5 else "red"
+            st.markdown(f"**🛡️ Faithfulness:** :{color}[{faith_score:.2f}]  \n*{faith_reason}*")
         
-        # Color logic based on the 0-1 scale
-        color = "green" if score >= 0.8 else "orange" if score >= 0.5 else "red"
-        st.markdown(f"**🛡️ Fidelity Audit (Scale 0-1):** :{color}[{score:.2f}]  \n*{reason}*")
+        # Display Relevance Score
+        if relevance_score is not None:
+            color = "green" if relevance_score >= 0.8 else "orange" if relevance_score >= 0.5 else "red"
+            st.markdown(f"**🎯 Relevance:** :{color}[{relevance_score:.2f}]  \n*{relevance_reason}*")
 
     # 2. Split View: Graph vs Evidence
     col_res_graph, col_res_text = st.columns([3, 2], gap="large")

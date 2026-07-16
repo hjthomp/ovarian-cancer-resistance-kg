@@ -12,7 +12,7 @@ This repository presents an evidence-based knowledge graph (KG) framework for st
 -   [Article Builder Module](#-article-builder-module)
 -   [Abstract Augmenter Module](#-abstract-augmenter-module)
 -   [Interactive Visualization](#-interactive-visualization)
--   [GraphRAG (Graph-based QA)](#-graphrag-graph-based-qa)
+-   [Reasoning Framework](#-reasoning-framework)
 -   [Experiments & Analysis Module](#-experiments--analysis-module)
 - [Citation](#-citation)
 - [License](#-license)
@@ -32,7 +32,7 @@ This repository presents an evidence-based knowledge graph (KG) framework for st
 
 * **Interactive Graph Exploration**: Provides a web-based interface for exploring the KG, including filtering, community detection, and path-based analysis.
 
-* **GraphRAG (Graph-based QA)**: Enables natural language querying over the KG, supporting evidence-grounded reasoning and knowledge discovery.
+* **Reasoning Framework**: Enables natural language querying over the E-KG, supporting evidence-grounded reasoning and knowledge discovery.
 
 ---
 
@@ -137,7 +137,7 @@ This will open the interactive interface:
   [3] Release Manager (Publish to 'data/releases')
   [4] Experiments & Analysis
   [5] Interactive Visualization (Web)
-  [6] GraphRAG Interface (Streamlit)
+  [6] Reasoning Framework (Streamlit)
   ---
   [Q] Exit Application
 ============================================================
@@ -208,11 +208,11 @@ Select option `[5] Interactive Visualization (Web)` from the main menu, or open 
 
 ---
 
-## 🤖 GraphRAG (Graph-based QA)
+## 🤖 Reasoning Framework
 
 This module (`src/graph_rag`) provides an interactive Streamlit-based interface for natural language querying of the KG, enabling evidence-grounded question answering and reasoning over biomedical data.
 
-Select option `[6] GraphRAG Interface (Streamlit)` from the main menu, or run the Streamlit app (`streamlit run src/graph_rag/app.py`). Ensure that Ollama is running before launching the application.
+Select option `[6] Reasoning Framework (Streamlit)` from the main menu, or run the Streamlit app (`streamlit run src/graph_rag/app.py`). Ensure that Ollama is running before launching the application.
 
 ![GraphRAG demo](assets/graphrag_demo.gif)
 

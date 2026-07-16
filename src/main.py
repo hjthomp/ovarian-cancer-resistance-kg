@@ -31,7 +31,7 @@ def main() -> None:
         print("  [3] Release Manager (Publish to 'data/releases')")
         print("  [4] Experiments & Analysis")
         print("  [5] Interactive Visualization (Web)")
-        print("  [6] GraphRAG Interface (Streamlit)")
+        print("  [6] Reasoning Framework (Streamlit)")
         print("  ---")
         print("  [Q] Exit Application")
         print("="*60)
