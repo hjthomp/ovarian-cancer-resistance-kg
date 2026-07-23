@@ -32,20 +32,42 @@ FIG2_YLABEL = "Adjacent-node metrics"
 # DATA PREP
 def prepare_df(df):
     df = df.copy()
+
+    # Define a consistent order for baselines that might appear
+    baseline_order = ["default"]
     
-    settings = df["setting"]
+    # Separate baselines and agglomerative results
+    # Filter only for baselines that are actually present in the results
+    existing_baselines = [b for b in baseline_order if b in df['setting'].unique()]
+    df_baselines = df[df['setting'].isin(existing_baselines)].copy()
+    df_semantic = df[df['setting'] == 'agglomerative'].copy()
+
+    # Sort baselines according to the defined order
+    df_baselines['setting'] = pd.Categorical(df_baselines['setting'], categories=existing_baselines, ordered=True)
+    df_baselines = df_baselines.sort_values('setting')
+
+    # Sort semantic results by threshold
+    df_semantic = df_semantic.sort_values('threshold')
+    
+    # Recombine and reset index to ensure correct plotting order
+    df_sorted = pd.concat([df_baselines, df_semantic], ignore_index=True)
+
+    # --- Create new labels based on the *sorted* dataframe ---
     new_settings = []
-    for i, s in enumerate(settings):
+    for i, row in df_sorted.iterrows():
+        s = row['setting']
         if s == "random":
             new_settings.append("Random\nBaseline")
-        elif "agglomerative" in s:
-            new_settings.append(df["threshold"][i])
+        elif s == "default":
+            new_settings.append("Thematic\n(Baseline)")
+        elif s == "agglomerative":
+            new_settings.append(row['threshold'])
         else:
-            new_settings.append(s)
+            new_settings.append(s) # Fallback
 
-    df["setting"] = new_settings
+    df_sorted["setting"] = new_settings
     
-    return df
+    return df_sorted
 
 # UTILS
 def save_fig(name):
@@ -75,7 +97,7 @@ def format_axis(ax, ylabel):
     ax.set_ylabel(ylabel)
 
     ax.set_xticks(ax.get_xticks())
-    ax.set_xticklabels(ax.get_xticklabels(), linespacing=1.3) # rotation=45
+    ax.set_xticklabels(ax.get_xticklabels(), linespacing=1.5) # rotation=45
 
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles[::-1], labels[::-1], frameon=False, loc="best")
@@ -83,29 +105,33 @@ def format_axis(ax, ylabel):
 
 # BRACKET BELOW X-AXIS
 def add_group_bracket_below(ax, x_start, x_end, text):
+    # Do not draw if the range is invalid
+    if x_start >= x_end:
+        return
+        
     y = -0.1  # position below axis
 
     # horizontal line (main bracket)
     ax.plot(
         [x_start, x_end],
         [y, y],
-        transform=ax.get_xaxis_transform(),
+        transform=ax.get_xaxis_transform(), # Use axis-relative coordinates for y
         color="black",
         linewidth=1,
         clip_on=False
     )
 
-    # left tick |
+    # left tick
     ax.plot(
         [x_start, x_start],
         [y, y + 0.04],
-        transform=ax.get_xaxis_transform(),
+        transform=ax.get_xaxis_transform(), 
         color="black",
         linewidth=1,
         clip_on=False
     )
 
-    # right tick |
+    # right tick
     ax.plot(
         [x_end, x_end],
         [y, y + 0.04],
@@ -139,7 +165,10 @@ def plot_batch_metrics_on_ax(ax, df):
 
     format_axis(ax, FIG1_YLABEL)
 
-    add_group_bracket_below(ax, 1, len(x) - 1, "Agglomerative clustering (thresholds)")
+    # Dynamically find where agglomerative clustering starts
+    first_agg_idx = df[df['threshold'] != "none"].index.min()
+    if first_agg_idx is not None and not pd.isna(first_agg_idx):
+        add_group_bracket_below(ax, first_agg_idx, len(x) - 1, "Agglomerative (Thresholds)")
 
 def plot_adjacent_metrics_on_ax(ax, df):
     """Helper to plot adjacent metrics on a given Axes object."""
@@ -154,7 +183,10 @@ def plot_adjacent_metrics_on_ax(ax, df):
 
     format_axis(ax, FIG2_YLABEL)
 
-    add_group_bracket_below(ax, 1, len(x) - 1, "Agglomerative clustering (thresholds)")
+    # Dynamically find where agglomerative clustering starts
+    first_agg_idx = df[df['threshold'] != "none"].index.min()
+    if first_agg_idx is not None and not pd.isna(first_agg_idx):
+        add_group_bracket_below(ax, first_agg_idx, len(x) - 1, "Agglomerative (Thresholds)")
 
 # FIGURE 1
 def plot_batch_metrics(df):

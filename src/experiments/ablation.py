@@ -146,6 +146,22 @@ def run_experiment(sorted_nodes, label, threshold, embeddings_dict, prompt_templ
     print({k: result[k] for k in result if k != "batches"})
     return result
 
+def get_nodes_in_default_order(graph: dict) -> list[str]:
+    """
+    Extracts all unique nodes from the graph, preserving the order of appearance
+    as they are read from the thematic clusters.
+    """
+    seen_nodes = set()
+    ordered_nodes = []
+    for theme in sorted(graph.keys()): # Sort themes for determinism
+        for triplet in graph[theme]:
+            for node_key in ["subject", "object"]:
+                node = triplet.get(node_key)
+                if node and node not in seen_nodes:
+                    ordered_nodes.append(node)
+                    seen_nodes.add(node)
+    return ordered_nodes
+
 def run_ablation_study() -> None:
 
     # --- 1. Load Configuration ---
@@ -159,6 +175,7 @@ def run_ablation_study() -> None:
     EMBEDDING_MODEL = config.get("embedding_model")
     BATCH_SIZE = config.get("batch_size")
     NUM_CTX = config.get("num_ctx")
+    METHODS_TO_RUN = config.get("methods_to_run", {})
 
     PROMPT_TEMPLATE = load_txt(PROMPT_DIR / "abstract_augmenter" / "normalize_graph.txt") or "dummy"
 
@@ -186,45 +203,58 @@ def run_ablation_study() -> None:
 
     results = []
 
-    print("\n=== BASELINE: RANDOM ORDERING ===")
-    sorted_nodes_random = all_nodes.copy()
-    random.seed(42)
-    random.shuffle(sorted_nodes_random)
-
-    results.append(
-        run_experiment(
-            sorted_nodes_random,
-            label="random",
-            threshold="none",
-            embeddings_dict=embeddings_dict,
-            prompt_template=PROMPT_TEMPLATE,
-            batch_size=BATCH_SIZE,
-            num_ctx=NUM_CTX
-        )
-    )
-
-    # SEMANTIC THRESHOLDS
-    print("\n=== SEMANTIC THRESHOLDS ===")
-
-    for t in THRESHOLDS:
-
-        sorted_nodes = sort_nodes_semantically(
-            nodes=all_nodes,
-            model_name=EMBEDDING_MODEL,
-            distance_threshold=t
-        )
-
+    if METHODS_TO_RUN.get("random", False):
+        print("\n=== BASELINE: RANDOM ORDERING ===")
+        sorted_nodes_random = all_nodes.copy()
+        random.seed(42)
+        random.shuffle(sorted_nodes_random)
         results.append(
             run_experiment(
-                sorted_nodes,
-                f"agglomerative",
-                t,
-                embeddings_dict,
+                sorted_nodes_random,
+                label="random",
+                threshold="none",
+                embeddings_dict=embeddings_dict,
                 prompt_template=PROMPT_TEMPLATE,
                 batch_size=BATCH_SIZE,
                 num_ctx=NUM_CTX
             )
         )
+
+    if METHODS_TO_RUN.get("default", False):
+        print("\n=== BASELINE: DEFAULT GRAPH ORDER ===")
+        sorted_nodes_default = get_nodes_in_default_order(graph)
+        results.append(
+            run_experiment(
+                sorted_nodes_default,
+                label="default",
+                threshold="none",
+                embeddings_dict=embeddings_dict,
+                prompt_template=PROMPT_TEMPLATE,
+                batch_size=BATCH_SIZE,
+                num_ctx=NUM_CTX
+            )
+        )
+    
+    if METHODS_TO_RUN.get("semantic", False):
+        print("\n=== SEMANTIC THRESHOLDS ===")
+        for t in THRESHOLDS:
+            print(f"\n--- Running for threshold: {t} ---")
+            sorted_nodes_semantic = sort_nodes_semantically(
+                nodes=all_nodes,
+                model_name=EMBEDDING_MODEL,
+                distance_threshold=t
+            )
+            results.append(
+                run_experiment(
+                    sorted_nodes_semantic,
+                    f"agglomerative",
+                    t,
+                    embeddings_dict,
+                    prompt_template=PROMPT_TEMPLATE,
+                    batch_size=BATCH_SIZE,
+                    num_ctx=NUM_CTX
+                )
+            )
 
     # SAVE OUTPUTS
     df = pd.DataFrame(results)
