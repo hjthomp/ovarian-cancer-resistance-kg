@@ -1,6 +1,6 @@
-# Ovarian Cancer Resistance Knowledge Graph
+# Evidence-Based Knowledge Graph for Ovarian Cancer Resistance
 
-This repository presents an evidence-based knowledge graph (KG) framework for studying resistance mechanisms in ovarian cancer. It integrates information extraction from scientific literature with large language models (LLMs), combined with human-in-the-loop (HITL) validation, enabling the construction, enrichment, and exploration of structured biomedical knowledge.
+This repository presents an _Evidence-based Knowledge Graph_ (E-KG) framework for studying resistance mechanisms in ovarian cancer. It integrates information extraction from scientific literature with large language models (LLMs), combined with human-in-the-loop (HITL) validation, enabling the construction, enrichment, and exploration of structured biomedical knowledge.
 
 ## 📋 Table of Contents
 
@@ -22,13 +22,13 @@ This repository presents an evidence-based knowledge graph (KG) framework for st
 
 ## 🚀 Key Features
 
-* **Evidence-based KG Construction**: Builds a graph grounded in scientific literature, where each extracted relation is linked to its original source (DOI, page, and textual evidence), ensuring traceability and interpretability.
+* **Evidence-based KG Construction**: Builds a E-KG grounded in scientific literature, where each extracted relation is linked to its original source (DOI, page, and textual evidence), ensuring traceability and interpretability.
 
 * **LLM-based Information Extraction**: Leverages LLMs to identify and extract structured relations (subject–predicate–object) from full-text articles and abstracts.
 
 * **Human-in-the-Loop (HITL) Validation**: Integrates expert feedback into the graph construction pipeline through iterative refinement of extraction, structuring, and normalization, improving quality and reliability.
 
-* **Normalization and Refinement**: Combines embedding-based clustering, LLM-assisted disambiguation, and expert-defined constraints to ensure consistent and semantically coherent graph representations.
+* **Normalization and Refinement**: Combines embedding-based clustering, LLM-assisted disambiguation, and expert-defined constraints to yield consistent and semantically coherent graph representations.
 
 * **Interactive Graph Exploration**: Provides a web-based interface for exploring the KG, including filtering, community detection, and path-based analysis.
 
@@ -149,13 +149,13 @@ Select the corresponding option to execute each module.
 
 ## 🧩 Article Builder Module
 
-This module (`src/article_builder`) constructs the initial KG from full-text PDF articles, extracting structured relations from scientific literature and integrating them into the graph. It is configured via `config/article_builder/` and uses data stored under `data/raw/articles`.
+This module (`src/article_builder`) constructs the initial E-KG from a collection of full-text PDF articles. It is configured via `config/article_builder/` and uses data stored under `data/raw/articles`.
 
 Select option `[1] Article Builder (PDFs -> Graph)` from the main menu.
 
 ```text
 ===================== MODULE: BUILD_GRAPH ======================
-      Articles are loaded from 'config/articles.yaml'
+      Articles are loaded from 'config/article_builder/articles.yaml'
 
   [1] Create a graph from all articles
   [2] Create a graph from an article
@@ -171,7 +171,7 @@ Select option `[1] Article Builder (PDFs -> Graph)` from the main menu.
 
 ## 🔄 Abstract Augmenter Module
 
-This module (`src/abstract_augmenter`) extends the KG by retrieving, processing, and normalizing related abstracts from PubMed. It is configured via the `config/abstract_augmenter/` directory and uses existing graphs as input for further enrichment.
+This module (`src/abstract_augmenter`) enriches an existing E-KG by scraping, processing, and normalizing related abstracts from PubMed. It is configured via `config/abstract_augmenter/` and uses graphs from the `article_builder` or previous augmentation runs as a starting point.
 
 Select option `[2] Abstract Augmenter (PubMed -> Augmentation)` from the main menu.
 
@@ -235,6 +235,8 @@ Select option `[4] Experiments & Analysis` from the main menu.
   [5] NER Pipeline (Extraction & Normalization)
   [6] Plot NER Results
   [7] Plot WordClouds
+  [8] Ablation Study
+  [9] Plot Ablation Study Results
   ---
   [R] Return to principal menu
   [Q] Exit Application

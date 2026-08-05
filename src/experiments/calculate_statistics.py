@@ -73,6 +73,10 @@ def calculate_statistics(kg_data: Dict[str, Any]) -> Dict[str, Any]:
     # Cluster stats
     cluster_stats = defaultdict(lambda: {"nodes": set(), "triplets": set(), "relations": set()})
     
+    # Evidence tracking
+    unique_evidences = set()
+    evidence_to_source = {} # To track source for each unique evidence
+
     # NetworkX Graph (MultiDiGraph to capture all edges/degrees correctly)
     G = nx.MultiDiGraph()
     
@@ -119,10 +123,26 @@ def calculate_statistics(kg_data: Dict[str, Any]) -> Dict[str, Any]:
                 nodes_from_abstracts.update([s, o])
                 triplets_from_abstracts.add(triplet_id)
 
+            # Process evidences for unique counting
+            for ev in t.get("evidence_list", []):
+                ev_text = ev.get("evidence_text")
+                if not ev_text:
+                    continue
+                
+                unique_evidences.add(ev_text)
+
+                # Store the source only the first time we see an evidence
+                if ev_text not in evidence_to_source:
+                    if "article" in source:
+                        evidence_to_source[ev_text] = "article"
+                    elif "abstract" in source:
+                        evidence_to_source[ev_text] = "abstract"
+
     # --- 1. Global Coverage ---
     stats["global"]["total_triplets"] = len(all_triplets)
     stats["global"]["total_nodes"] = len(all_nodes)
     stats["global"]["total_relations"] = len(all_relations)
+    stats["global"]["total_unique_evidences"] = len(unique_evidences)
     stats["global"]["total_evidences"] = total_evidences
     stats["global"]["total_themes"] = len(graph_data.keys())
 
@@ -158,6 +178,14 @@ def calculate_statistics(kg_data: Dict[str, Any]) -> Dict[str, Any]:
     stats["source_coverage"]["triplets_abstracts"] = len(triplets_from_abstracts)
     stats["source_coverage"]["triplets_intersection"] = len(triplets_from_articles & triplets_from_abstracts)
     
+    # Count unique evidences per source
+    evidence_source_counts = Counter(evidence_to_source.values())
+    stats["source_coverage"]["evidences_articles"] = evidence_source_counts.get("article", 0)
+    stats["source_coverage"]["evidences_abstracts"] = evidence_source_counts.get("abstract", 0)
+
+    if stats["global"]["total_unique_evidences"] > 0:
+        stats["global"]["avg_triplets_per_evidence"] = stats["global"]["total_triplets"] / stats["global"]["total_unique_evidences"]
+
     # --- 3. Additional Stats ---
     # Per Cluster
     for theme, data in cluster_stats.items():
@@ -204,7 +232,8 @@ def save_results(stats: Dict[str, Any], output_dir: Path) -> None:
         f.write(f"- Total Triplets (unique w/ theme): {g['total_triplets']}\n")
         f.write(f"- Total Nodes: {g['total_nodes']}\n")
         f.write(f"- Total Relations: {g['total_relations']}\n")
-        f.write(f"- Total Evidences: {g['total_evidences']}\n")
+        f.write(f"- Total Unique Evidences: {g['total_unique_evidences']}\n")
+        f.write(f"- Avg. Triplets per Evidence: {g.get('avg_triplets_per_evidence', 0):.2f}\n")
         f.write(f"- Themes: {g['total_themes']}\n")
         f.write(f"- Weakly Connected Components: {g.get('connected_components', 0)}\n")
         f.write(f"- Strongly Connected Components: {g.get('strongly_connected_components', 0)}\n")
@@ -220,6 +249,8 @@ def save_results(stats: Dict[str, Any], output_dir: Path) -> None:
         f.write(f"- Nodes Intersection: {s['nodes_intersection']}\n")
         f.write(f"- Triplets from Articles: {s['triplets_articles']}\n")
         f.write(f"- Triplets from Abstracts: {s['triplets_abstracts']}\n")
+        f.write(f"- Unique Evidences from Articles: {s.get('evidences_articles', 0)}\n")
+        f.write(f"- Unique Evidences from Abstracts: {s.get('evidences_abstracts', 0)}\n")
         f.write(f"- Triplets Intersection: {s['triplets_intersection']}\n\n")
         
         add = stats["additional"]

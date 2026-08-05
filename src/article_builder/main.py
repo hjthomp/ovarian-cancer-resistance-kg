@@ -445,7 +445,7 @@ def main() -> None:
     title = " MODULE: BUILD_GRAPH "
     while True:
         print("\n" + title.center(menu_width, "="))
-        print(f"Articles are loaded from 'config/articles.yaml'".center(menu_width))
+        print(f"Articles are loaded from 'config/article_builder/articles.yaml'".center(menu_width))
         print("\n  [1] Create a graph from all articles")
         print("  [2] Create a graph from an article")
         print("  [3] Unify processed graphs")
