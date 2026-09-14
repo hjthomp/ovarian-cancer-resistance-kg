@@ -495,6 +495,31 @@
             clusterCenters[th] = { x: x, y: height / 2 };
         });
 
+        // --- Compute offsets for duplicate/parallel links ---
+        const linkGroups = new Map();
+        links.forEach(l => {
+            const sId = typeof l.source === 'object' ? l.source.id : l.source;
+            const tId = typeof l.target === 'object' ? l.target.id : l.target;
+            // Key pair sorted or direction-aware. Grouping strictly by pair (unidirectional or bidirectional):
+            const key = sId < tId ? `${sId}|${tId}` : `${tId}|${sId}`;
+            if (!linkGroups.has(key)) linkGroups.set(key, []);
+            linkGroups.get(key).push(l);
+        });
+        const PARALLEL_SPACING = 12; // Spacing in px between parallel lines
+        linkGroups.forEach(group => {
+            const count = group.length;
+            group.forEach((l, i) => {
+                // Determine orientation relative to canonical key (sId < tId)
+                const sId = typeof l.source === 'object' ? l.source.id : l.source;
+                const tId = typeof l.target === 'object' ? l.target.id : l.target;
+                const isCanonical = sId < tId;
+                
+                // Centered offset multiplier: e.g. for count=2 -> -0.5, 0.5
+                const rawOffset = (i - (count - 1) / 2) * PARALLEL_SPACING;
+                l.linkOffset = isCanonical ? rawOffset : -rawOffset;
+            });
+        });
+
         simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).id(d => d.id).distance(LINK_DISTANCE).strength(STRENGTH))
             .force("charge", d3.forceManyBody().strength(CHARGE_STRENGTH))
@@ -643,49 +668,61 @@
             // so they don't overlap with nodes and arrows are displayed correctly.
             link
                 .attr("x1", d => {
-                    if (isHighPerformance) return d.source.x;
-                    const sourceRadius = radiusScale(d.source.degree);
                     const dx = d.target.x - d.source.x;
                     const dy = d.target.y - d.source.y;
-                    const L = Math.hypot(dx, dy);
-                    if (L === 0) return d.source.x; // Avoid division by zero if nodes coincide
-                    // Adjust x1 to start at the source node's circumference
-                    return d.source.x + (dx / L) * sourceRadius;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / L;
+                    const offX = nx * (d.linkOffset || 0);
+                    if (isHighPerformance) return d.source.x + offX;
+                    const sourceRadius = radiusScale(d.source.degree);
+                    return d.source.x + offX + (dx / L) * sourceRadius;
                 })
                 .attr("y1", d => {
-                    if (isHighPerformance) return d.source.y;
-                    const sourceRadius = radiusScale(d.source.degree);
                     const dx = d.target.x - d.source.x;
                     const dy = d.target.y - d.source.y;
-                    const L = Math.hypot(dx, dy);
-                    if (L === 0) return d.source.y; // Avoid division by zero
-                    // Adjust y1 to start at the source node's circumference
-                    return d.source.y + (dy / L) * sourceRadius;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const ny = dx / L;
+                    const offY = ny * (d.linkOffset || 0);
+                    if (isHighPerformance) return d.source.y + offY;
+                    const sourceRadius = radiusScale(d.source.degree);
+                    return d.source.y + offY + (dy / L) * sourceRadius;
                 })
                 .attr("x2", d => {
-                    if (isHighPerformance) return d.target.x;
-                    const targetRadius = radiusScale(d.target.degree);
                     const dx = d.target.x - d.source.x;
                     const dy = d.target.y - d.source.y;
-                    const L = Math.hypot(dx, dy);
-                    if (L === 0) return d.target.x; // Avoid division by zero
-                    // Adjust x2 to end at the target node's circumference
-                    return d.target.x - (dx / L) * targetRadius;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / L;
+                    const offX = nx * (d.linkOffset || 0);
+                    if (isHighPerformance) return d.target.x + offX;
+                    const targetRadius = radiusScale(d.target.degree);
+                    return d.target.x + offX - (dx / L) * targetRadius;
                 })
                 .attr("y2", d => {
-                    if (isHighPerformance) return d.target.y;
-                    const targetRadius = radiusScale(d.target.degree);
                     const dx = d.target.x - d.source.x;
                     const dy = d.target.y - d.source.y;
-                    const L = Math.hypot(dx, dy);
-                    if (L === 0) return d.target.y; // Avoid division by zero
-                    // Adjust y2 to end at the target node's circumference
-                    return d.target.y - (dy / L) * targetRadius;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const ny = dx / L;
+                    const offY = ny * (d.linkOffset || 0);
+                    if (isHighPerformance) return d.target.y + offY;
+                    const targetRadius = radiusScale(d.target.degree);
+                    return d.target.y + offY - (dy / L) * targetRadius;
                 });
 
             linkLabels
-                .attr("x", (d) => (d.source.x + d.target.x) / 2)
-                .attr("y", (d) => (d.source.y + d.target.y) / 2 + TICK_LABEL_OFFSET_Y);
+                .attr("x", (d) => {
+                    const dx = d.target.x - d.source.x;
+                    const dy = d.target.y - d.source.y;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / L;
+                    return (d.source.x + d.target.x) / 2 + nx * (d.linkOffset || 0);
+                })
+                .attr("y", (d) => {
+                    const dx = d.target.x - d.source.x;
+                    const dy = d.target.y - d.source.y;
+                    const L = Math.hypot(dx, dy) || 1;
+                    const ny = dx / L;
+                    return (d.source.y + d.target.y) / 2 + ny * (d.linkOffset || 0) + TICK_LABEL_OFFSET_Y;
+                });
 
             nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
 
