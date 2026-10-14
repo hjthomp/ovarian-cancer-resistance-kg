@@ -2,6 +2,10 @@
 
 This repository presents an _Evidence-based Knowledge Graph_ (E-KG) framework for studying resistance mechanisms in ovarian cancer. It integrates information extraction from scientific literature with large language models (LLMs), combined with human-in-the-loop (HITL) validation, enabling the construction, enrichment, and exploration of structured biomedical knowledge.
 
+- **Full Paper:** [**An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance**](https://www.mdpi.com/2504-4990/8/10/321)
+
+---
+
 ## 📋 Table of Contents
 
 -   [Key Features](#-key-features)
@@ -249,14 +253,40 @@ Select option `[4] Experiments & Analysis` from the main menu.
 
 If you find this work useful, please cite:
 
+<details>
+<summary><b>APA Format</b></summary>
+
+```text
+Thompson, H., Conforti, R. A., Andujar, S. A., Casais, M., Telleria, C. M., & Errecalde, M. L. (2026). An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance. Machine Learning and Knowledge Extraction, 8(10), 321. https://doi.org/10.3390/make8100321.
+```
+
+</details>
+
+<details>
+<summary><b>IEEE Format</b></summary>
+
+```text
+H. Thompson, R. A. Conforti, S. A. Andujar, M. Casais, C. M. Telleria, and M. L. Errecalde, "An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance," Machine Learning and Knowledge Extraction, vol. 8, no. 10, Art. no. 321, 2026, doi: 10.3390/make8100321.
+```
+
+</details>
+
+### BibTeX
+
 ```bibtex
-@article{thompson2026ekg,
-  title={An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance},
-  author={Thompson, Horacio and Conforti, Rocío A. and Andujar, Sebastián A. and Casais, Marilina and Telleria, Carlos M. and Errecalde, Marcelo},
-  journal={Submitted to MDPI},
-  year={2026}
+@Article{thompson2026ekg,
+  author         = {Thompson, Horacio and Conforti, Roc{\'i}o A. and Andujar, Sebasti{\'a}n A. and Casais, Marilina and Telleria, Carlos M. and Errecalde, Marcelo L.},
+  title          = {An Evidence-Based Knowledge Graph Framework with Large Language Models and Human-in-the-Loop for Ovarian Cancer Resistance},
+  journal        = {Machine Learning and Knowledge Extraction},
+  volume         = {8},
+  year           = {2026},
+  number         = {10},
+  article-number = {321},
+  url            = {https://www.mdpi.com/2504-4990/8/10/321},
+  doi            = {10.3390/make8100321}
 }
 ```
+
 
 ## 📬 Contact
 [hjthompson@unsl.edu.ar](mailto:hjthompson@unsl.edu.ar)
